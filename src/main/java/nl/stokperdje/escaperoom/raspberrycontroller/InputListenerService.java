@@ -18,8 +18,11 @@ public class InputListenerService {
     public InputListenerService() {
         System.out.println("Service instantiated");
         button.addListener((GpioPinListenerDigital) event -> {
-            String url = "http://192.168.2.51:8081/barcode/test/" + event.getState();
-            restTemplate.getForEntity(url, String.class);
+            // High is ingedrukt, Low is weer uitgedrukt
+            if (event.getState().isHigh()) {
+                String url = "http://192.168.0.105:8081/barcode/test/" + event.getState();
+                restTemplate.getForEntity(url, String.class);
+            }
         });
     }
 }
