@@ -6,6 +6,11 @@ import nl.stokperdje.escaperoom.raspberrycontroller.task.GpioPinTask;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -19,6 +24,7 @@ public class GpioService {
     private final GpioPinDigitalInput button = gpio.provisionDigitalInputPin(
             RaspiPin.GPIO_03, PinPullResistance.PULL_DOWN
     );
+    private Date lastPress = Date.from(Instant.now());
 
     // Alarm schakelkastje
     private final GpioPinDigitalInput schakelKastje = gpio.provisionDigitalInputPin(RaspiPin.GPIO_02);
@@ -29,12 +35,16 @@ public class GpioService {
     // Rookmachine
     private final GpioPinDigitalOutput rook = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_07);
 
+    // Hoofdverlichting
+    private final GpioPinDigitalOutput hoofdverlichting = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_15);
+
     public GpioService() {
         System.out.println("Service instantiated");
         button.addListener((GpioPinListenerDigital) event -> {
             // High is ingedrukt, Low is weer uitgedrukt
-            if (event.getState().isHigh()) {
-                // Todo: Http request
+            long diffTime = (lastPress.getTime() - Date.from(Instant.now()).getTime()) / 1000;
+            if (event.getState().isHigh() && diffTime > 5) {
+                // Todo: Http request. Server handle action
 //                String url = "http://192.168.0.105:8081/barcode/test/" + event.getState();
 //                restTemplate.getForEntity(url, String.class);
             }
@@ -42,20 +52,20 @@ public class GpioService {
 
         schakelKastje.addListener((GpioPinListenerDigital) event -> {
             if (event.getState().isHigh()) {
-                lasers.high();
-            } else {
-                lasers.low();
+                // Todo: HTTP request. Server should send another HTTP request to turn off lasers
             }
         });
     }
 
     public void toggleRook() {
         Timer timer = new Timer();
-        timer.schedule(new GpioPinTask(this.rook) {
-            @Override
-            public void run() {
-                
-            }
-        }, 0);
+        timer.schedule(new GpioPinTask(this.rook), 0);
+    }
+
+    public void setHoofdverlichting(boolean on) {
+        if (on)
+            this.hoofdverlichting.high();
+        else
+            this.hoofdverlichting.low();
     }
 }

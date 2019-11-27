@@ -1,19 +1,32 @@
 package nl.stokperdje.escaperoom.raspberrycontroller.task;
 
 import com.pi4j.io.gpio.GpioPinDigital;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.PinMode;
 
 import java.util.TimerTask;
 
 public class GpioPinTask extends TimerTask {
 
-    GpioPinDigital pin;
+    GpioPinDigitalOutput pin;
 
-    public GpioPinTask(GpioPinDigital pin) {
+    public GpioPinTask(GpioPinDigitalOutput pin) {
         this.pin = pin;
+    }
+
+    private void toggleRook() {
+        this.pin.high();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ignored) {
+        } finally {
+            this.pin.low();
+            this.cancel();
+        }
     }
 
     @Override
     public void run() {
-
+        this.toggleRook();
     }
 }
