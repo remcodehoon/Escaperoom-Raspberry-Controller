@@ -1,8 +1,6 @@
 package nl.stokperdje.escaperoom.raspberrycontroller.task;
 
-import com.pi4j.io.gpio.GpioPinDigital;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.PinMode;
 
 import java.util.TimerTask;
 
