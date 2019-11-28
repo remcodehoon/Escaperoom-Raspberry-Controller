@@ -2,6 +2,7 @@ package nl.stokperdje.escaperoom.raspberrycontroller;
 
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
+import nl.stokperdje.escaperoom.raspberrycontroller.dto.Status;
 import nl.stokperdje.escaperoom.raspberrycontroller.task.GpioPinTask;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +27,12 @@ public class GpioService {
     );
     private Date lastPress = Date.from(Instant.now());
 
+    // Laser sensor 1
+    private final GpioPinDigitalInput sensor1 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_00);
+
+    // Laser sensor 1
+    private final GpioPinDigitalInput sensor2 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_01);
+
     // Alarm schakelkastje
     private final GpioPinDigitalInput schakelKastje = gpio.provisionDigitalInputPin(RaspiPin.GPIO_02);
 
@@ -37,6 +44,9 @@ public class GpioService {
 
     // Hoofdverlichting
     private final GpioPinDigitalOutput hoofdverlichting = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_15);
+
+    // Lock
+    private final GpioPinDigitalOutput lock = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_08);
 
     public GpioService() {
         System.out.println("Service instantiated");
@@ -55,6 +65,17 @@ public class GpioService {
                 // Todo: HTTP request. Server should send another HTTP request to turn off lasers
             }
         });
+    }
+
+    public Status getIOStats() {
+        Status status = new Status();
+        status.setSensor1Status(sensor1.isHigh());
+        status.setSensor2Status(sensor2.isHigh());
+        status.setSchakelkastStatus(schakelKastje.isHigh());
+        status.setLaserStatus(lasers.isHigh());
+        status.setVerlichtingStatus(hoofdverlichting.isHigh());
+        status.setLockStatus(lock.isHigh());
+        return status;
     }
 
     public void toggleRook() {
