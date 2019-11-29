@@ -18,9 +18,6 @@ public class RookController {
     @GetMapping
     public ResponseEntity toggleRook() {
         this.service.toggleRook();
-        System.out.println("lalal");
         return new ResponseEntity<>(HttpStatus.OK);
-
-
     }
 }
