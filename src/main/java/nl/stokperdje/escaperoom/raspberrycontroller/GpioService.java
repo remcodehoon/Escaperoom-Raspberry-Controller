@@ -4,22 +4,22 @@ import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import nl.stokperdje.escaperoom.raspberrycontroller.dto.Status;
 import nl.stokperdje.escaperoom.raspberrycontroller.task.GpioPinTask;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.Date;
 import java.util.Timer;
-import java.util.TimerTask;
 
 @Service
 public class GpioService {
 
     private RestTemplate restTemplate = new RestTemplate();
     private final GpioController gpio = GpioFactory.getInstance();
+
+    @Value("${stokperdje.escaperoom.server.ip}")
+    private String serverIP;
 
     // Rode knop
     private final GpioPinDigitalInput button = gpio.provisionDigitalInputPin(
@@ -49,7 +49,7 @@ public class GpioService {
     private final GpioPinDigitalOutput lock = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_08);
 
     public GpioService() {
-        System.out.println("Service instantiated");
+        System.out.println("Service instantiated. Server IP is: " + this.serverIP);
         button.addListener((GpioPinListenerDigital) event -> {
             // High is ingedrukt, Low is weer uitgedrukt
             long diffTime = (lastPress.getTime() - Date.from(Instant.now()).getTime()) / 1000;
