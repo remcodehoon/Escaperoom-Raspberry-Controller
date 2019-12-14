@@ -37,4 +37,26 @@ public class VerlichtingController {
         this.service.setHoofdverlichting(false);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    /**
+     * Knop LED stroom: Klaar
+     * Zet Knop LED aan
+     * @return ResponseEntity
+     */
+    @GetMapping("/knopled/aan")
+    public ResponseEntity knopledAan() {
+        this.service.setButtonLED(true);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Knop LED stroom: Klaar
+     * Zet Knop LED uit
+     * @return ResponseEntity
+     */
+    @GetMapping("/knopled/uit")
+    public ResponseEntity knopledUit() {
+        this.service.setButtonLED(false);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
