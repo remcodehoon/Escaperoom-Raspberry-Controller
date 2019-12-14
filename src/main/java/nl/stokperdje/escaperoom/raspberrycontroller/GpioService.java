@@ -140,12 +140,27 @@ public class GpioService {
             this.hoofdverlichting.low();
     }
 
-    // Todo: Testen
-    public void TestSendIOStats() {
+    /**
+     * Button LED: Klaar
+     * Zet de button LED aan of uit
+     * @param on
+     */
+    public void setButtonLED(boolean on) {
+        if (on)
+            this.buttonLED.high();
+        else
+            this.buttonLED.low();
+    }
+
+    /**
+     * IO Stats: Klaar
+     * Stuurt de IOStats door naar serverapplicatie
+     */
+    public void sendIOStats() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(gson.toJson(this.getIOStats()), headers);
-        String url = "http://192.168.0.105:8081/iostats";
+        String url = "http://192.168.2.5:8081/iostats";
         this.restTemplate.postForEntity(url, request, String.class);
     }
 
@@ -155,18 +170,18 @@ public class GpioService {
      * @return IOStats
      */
     public IOStats getIOStats() {
-        IOStats IOStats = new IOStats();
-        IOStats.setDrukknop(button.isHigh());
-        IOStats.setDrukknopLED(buttonLED.isHigh());
-        IOStats.setSchakelkast(schakelKastje.isHigh());
-        IOStats.setRookmachineStroom(rookStroom.isHigh());
-        IOStats.setRookmachineToggle(rookToggle.isHigh());
-        IOStats.setVerlichting(hoofdverlichting.isHigh());
-        IOStats.setSlot3V(lock3V.isHigh());
-        IOStats.setSlot12V(lock12V.isHigh());
-        IOStats.setLasers(lasers.isHigh());
-        IOStats.setSensor1(sensor1.isHigh());
-        IOStats.setSensor2(sensor2.isHigh());
-        return IOStats;
+        IOStats stats = new IOStats();
+        stats.setDrukknop(button.isHigh());
+        stats.setDrukknopLED(buttonLED.isHigh());
+        stats.setSchakelkast(schakelKastje.isHigh());
+        stats.setRookmachineStroom(rookStroom.isHigh());
+        stats.setRookmachineToggle(rookToggle.isHigh());
+        stats.setVerlichting(hoofdverlichting.isHigh());
+        stats.setSlot3V(lock3V.isHigh());
+        stats.setSlot12V(lock12V.isHigh());
+        stats.setLasers(lasers.isHigh());
+        stats.setSensor1(sensor1.isHigh());
+        stats.setSensor2(sensor2.isHigh());
+        return stats;
     }
 }
