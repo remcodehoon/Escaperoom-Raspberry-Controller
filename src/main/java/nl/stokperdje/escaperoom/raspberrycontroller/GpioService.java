@@ -1,12 +1,15 @@
 package nl.stokperdje.escaperoom.raspberrycontroller;
 
+import nl.stokperdje.escaperoom.raspberrycontroller.dto.Status;
+import nl.stokperdje.escaperoom.raspberrycontroller.task.CloseLockTask;
+import nl.stokperdje.escaperoom.raspberrycontroller.task.RookToggleTask;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
-import nl.stokperdje.escaperoom.raspberrycontroller.dto.Status;
-import nl.stokperdje.escaperoom.raspberrycontroller.task.GpioPinTask;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,37 +17,36 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
+
 import java.util.Date;
 import java.util.Timer;
 
 @Service
 public class GpioService {
 
+    // GPIO
     private RestTemplate restTemplate = new RestTemplate();
     private final GpioController gpio = GpioFactory.getInstance();
 
-    @Value("${stokperdje.escaperoom.server.ip}")
-    private String serverIP;
-
+    // Gson
     private Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
     // Rode knop
     private final GpioPinDigitalInput button = gpio.provisionDigitalInputPin(
-            RaspiPin.GPIO_03, PinPullResistance.PULL_DOWN
+            RaspiPin.GPIO_13, PinPullResistance.PULL_DOWN
     );
+    private final GpioPinDigitalOutput buttonLED = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_12);
     private Date lastPress = Date.from(Instant.now());
 
-    // Laser sensor 1
-    private final GpioPinDigitalInput sensor1 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_10);
+    // Lasers
+    private final GpioPinDigitalOutput lasers = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_07);
 
-    // Laser sensor 1
+    // Laser sensoren
+    private final GpioPinDigitalInput sensor1 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_10);
     private final GpioPinDigitalInput sensor2 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_09);
 
     // Alarm schakelkastje
-    private final GpioPinDigitalInput schakelKastje = gpio.provisionDigitalInputPin(RaspiPin.GPIO_08);
-
-    // Beide lasers
-    private final GpioPinDigitalOutput lasers = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_07);
+    private final GpioPinDigitalInput schakelKastje = gpio.provisionDigitalInputPin(RaspiPin.GPIO_29);
 
     // Rookmachine
     private final GpioPinDigitalOutput rookToggle = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02);
@@ -58,7 +60,6 @@ public class GpioService {
     private final GpioPinDigitalOutput lock3V = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01);
 
     public GpioService() {
-        System.out.println("Service instantiated. Server IP is: " + this.serverIP);
         button.addListener((GpioPinListenerDigital) event -> {
             // High is ingedrukt, Low is weer uitgedrukt
             long diffTime = (lastPress.getTime() - Date.from(Instant.now()).getTime()) / 1000;
@@ -76,60 +77,67 @@ public class GpioService {
         });
     }
 
-    public Status getIOStats() {
-        Status status = new Status();
-        status.setSensor1Status(sensor1.isHigh());
-        status.setSensor2Status(sensor2.isHigh());
-        status.setSchakelkastStatus(schakelKastje.isHigh());
-        status.setLaserStatus(lasers.isHigh());
-        status.setVerlichtingStatus(hoofdverlichting.isHigh());
-        status.setLockStatus(lock12V.isHigh());
-        return status;
-    }
-
+    /**
+     * Rook Toggle: Klaar
+     * Zet rook aan en weer uit
+     */
     public void toggleRook() {
         Timer timer = new Timer();
-        timer.schedule(new GpioPinTask(this.rookToggle), 0);
+        timer.schedule(new RookToggleTask(this.rookToggle), 0);
     }
 
-    public void setRookStroomAan() {
-        this.rookStroom.high();
+    /**
+     * Rook Stroom: Klaar
+     * Zet stroom van rookmachine aan of uit
+     * @param on
+     */
+    public void setRookStroom(boolean on) {
+        if (on)
+            this.rookStroom.high();
+        else
+            this.rookStroom.low();
     }
 
-    public void setRookStroomUit() {
-        this.rookStroom.low();
+    /**
+     * Laser Stroom: Klaar
+     * Zet stroom van de lasers aan of uit
+     * @param on
+     */
+    public void setLaserStroom(boolean on) {
+        if (on)
+            this.lasers.high();
+        else
+            this.lasers.low();
     }
 
-    public void setLasersAan() {
-        this.lasers.high();
-    }
-
-    public void setLasersUit() {
-        this.lasers.low();
-    }
-
+    /**
+     * Slot op slot: Klaar
+     * Zet het slot op slot door kort 12V te geven en daarna 3V
+     */
     public void closeLock() {
-        this.lock3V.high();
-        this.lock12V.high();
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            this.lock12V.low();
-        }
+        Timer timer = new Timer();
+        timer.schedule(new CloseLockTask(lock3V, lock12V), 0);
     }
 
+    /**
+     * Slot open: Klaar
+     * Zet het slot open door de 12V en 3V laag te schrijven
+     */
     public void openLock() {
         this.lock12V.low();
         this.lock3V.low();
     }
 
+    /**
+     * Hoofdverlichting: Klaar
+     * Zet de hoofdverlichting aan of uit
+     * @param on
+     */
     public void setHoofdverlichting(boolean on) {
         if (on)
-            this.hoofdverlichting.low();
-        else
             this.hoofdverlichting.high();
+        else
+            this.hoofdverlichting.low();
     }
 
     // Todo: Testen
@@ -139,5 +147,26 @@ public class GpioService {
         HttpEntity<String> request = new HttpEntity<>(gson.toJson(this.getIOStats()), headers);
         String url = "http://192.168.0.105:8081/iostats";
         this.restTemplate.postForEntity(url, request, String.class);
+    }
+
+    /**
+     * IO Stats: Klaar
+     * Geeft de pinstatus van de meest belangrijke pins weer.
+     * @return Status
+     */
+    public Status getIOStats() {
+        Status status = new Status();
+        status.setDrukknop(button.isHigh());
+        status.setDrukknopLED(buttonLED.isHigh());
+        status.setSchakelkast(schakelKastje.isHigh());
+        status.setRookmachineStroom(rookStroom.isHigh());
+        status.setRookmachineToggle(rookToggle.isHigh());
+        status.setVerlichting(hoofdverlichting.isHigh());
+        status.setSlot3V(lock3V.isHigh());
+        status.setSlot12V(lock12V.isHigh());
+        status.setLasers(lasers.isHigh());
+        status.setSensor1(sensor1.isHigh());
+        status.setSensor2(sensor2.isHigh());
+        return status;
     }
 }

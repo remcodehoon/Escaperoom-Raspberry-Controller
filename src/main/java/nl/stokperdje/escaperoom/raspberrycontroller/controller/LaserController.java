@@ -1,6 +1,7 @@
 package nl.stokperdje.escaperoom.raspberrycontroller.controller;
 
 import nl.stokperdje.escaperoom.raspberrycontroller.GpioService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,15 +16,25 @@ public class LaserController {
     @Autowired
     private GpioService service;
 
-    @GetMapping("/uit")
-    public ResponseEntity laserUit() {
-        this.service.setLasersUit();
+    /**
+     * Laser stroom: Klaar
+     * Zet stroom van lasers aan
+     * @return ResponseEntity
+     */
+    @GetMapping("/aan")
+    public ResponseEntity laserAan() {
+        this.service.setLaserStroom(true);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/aan")
-    public ResponseEntity laserAan() {
-        this.service.setLasersAan();
+    /**
+     * Laser stroom: Klaar
+     * Zet stroom van lasers uit
+     * @return ResponseEntity
+     */
+    @GetMapping("/uit")
+    public ResponseEntity laserUit() {
+        this.service.setLaserStroom(false);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

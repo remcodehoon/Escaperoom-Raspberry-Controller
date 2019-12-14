@@ -1,6 +1,7 @@
 package nl.stokperdje.escaperoom.raspberrycontroller.controller;
 
 import nl.stokperdje.escaperoom.raspberrycontroller.GpioService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +16,22 @@ public class VerlichtingController {
     @Autowired
     private GpioService service;
 
+    /**
+     * Hoofdverlichting stroom: Klaar
+     * Zet hoofdverlichting aan
+     * @return ResponseEntity
+     */
     @GetMapping("/hoofdverlichting/aan")
     public ResponseEntity hoofdverlichtingAan() {
         this.service.setHoofdverlichting(true);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    /**
+     * Hoofdverlichting stroom: Klaar
+     * Zet hoofdverlichting uit
+     * @return ResponseEntity
+     */
     @GetMapping("/hoofdverlichting/uit")
     public ResponseEntity hoofdverlichtingUit() {
         this.service.setHoofdverlichting(false);

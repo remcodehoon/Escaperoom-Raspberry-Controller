@@ -4,18 +4,18 @@ import com.pi4j.io.gpio.GpioPinDigitalOutput;
 
 import java.util.TimerTask;
 
-public class GpioPinTask extends TimerTask {
+public class RookToggleTask extends TimerTask {
 
-    GpioPinDigitalOutput pin;
+    private final GpioPinDigitalOutput pin;
 
-    public GpioPinTask(GpioPinDigitalOutput pin) {
+    public RookToggleTask(GpioPinDigitalOutput pin) {
         this.pin = pin;
     }
 
     private void toggleRook() {
         this.pin.high();
         try {
-            Thread.sleep(1000);
+            Thread.sleep(5000);
         } catch (InterruptedException ignored) {
         } finally {
             this.pin.low();
