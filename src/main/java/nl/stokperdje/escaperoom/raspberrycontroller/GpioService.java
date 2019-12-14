@@ -1,6 +1,6 @@
 package nl.stokperdje.escaperoom.raspberrycontroller;
 
-import nl.stokperdje.escaperoom.raspberrycontroller.dto.Status;
+import nl.stokperdje.escaperoom.raspberrycontroller.dto.IOStats;
 import nl.stokperdje.escaperoom.raspberrycontroller.task.CloseLockTask;
 import nl.stokperdje.escaperoom.raspberrycontroller.task.RookToggleTask;
 
@@ -152,21 +152,21 @@ public class GpioService {
     /**
      * IO Stats: Klaar
      * Geeft de pinstatus van de meest belangrijke pins weer.
-     * @return Status
+     * @return IOStats
      */
-    public Status getIOStats() {
-        Status status = new Status();
-        status.setDrukknop(button.isHigh());
-        status.setDrukknopLED(buttonLED.isHigh());
-        status.setSchakelkast(schakelKastje.isHigh());
-        status.setRookmachineStroom(rookStroom.isHigh());
-        status.setRookmachineToggle(rookToggle.isHigh());
-        status.setVerlichting(hoofdverlichting.isHigh());
-        status.setSlot3V(lock3V.isHigh());
-        status.setSlot12V(lock12V.isHigh());
-        status.setLasers(lasers.isHigh());
-        status.setSensor1(sensor1.isHigh());
-        status.setSensor2(sensor2.isHigh());
-        return status;
+    public IOStats getIOStats() {
+        IOStats IOStats = new IOStats();
+        IOStats.setDrukknop(button.isHigh());
+        IOStats.setDrukknopLED(buttonLED.isHigh());
+        IOStats.setSchakelkast(schakelKastje.isHigh());
+        IOStats.setRookmachineStroom(rookStroom.isHigh());
+        IOStats.setRookmachineToggle(rookToggle.isHigh());
+        IOStats.setVerlichting(hoofdverlichting.isHigh());
+        IOStats.setSlot3V(lock3V.isHigh());
+        IOStats.setSlot12V(lock12V.isHigh());
+        IOStats.setLasers(lasers.isHigh());
+        IOStats.setSensor1(sensor1.isHigh());
+        IOStats.setSensor2(sensor2.isHigh());
+        return IOStats;
     }
 }

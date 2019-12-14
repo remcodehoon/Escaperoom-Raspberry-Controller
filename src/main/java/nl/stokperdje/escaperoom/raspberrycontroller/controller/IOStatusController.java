@@ -24,7 +24,7 @@ public class IOStatusController {
     /**
      * IOStatus: Klaar
      * Geeft de pinstatus van de meest belangrijke pins weer.
-     * @return Status
+     * @return IOStats
      */
     @GetMapping
     public ResponseEntity getStatus() {

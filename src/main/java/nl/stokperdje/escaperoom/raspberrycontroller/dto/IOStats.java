@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import lombok.Data;
 
 @Data
-public class Status {
+public class IOStats {
 
     // Drukknop
     @Expose private boolean drukknop;
