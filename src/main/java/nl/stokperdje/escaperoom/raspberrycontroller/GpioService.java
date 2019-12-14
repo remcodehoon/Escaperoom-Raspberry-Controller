@@ -64,15 +64,13 @@ public class GpioService {
             // High is ingedrukt, Low is weer uitgedrukt
             long diffTime = (lastPress.getTime() - Date.from(Instant.now()).getTime()) / 1000;
             if (event.getState().isHigh() && diffTime > 5) {
-                // Todo: Http request. Server handle action
-//                String url = "http://192.168.0.105:8081/barcode/test/" + event.getState();
-//                restTemplate.getForEntity(url, String.class);
+                this.sendIOStats();
             }
         });
 
         schakelKastje.addListener((GpioPinListenerDigital) event -> {
             if (event.getState().isHigh()) {
-                // Todo: HTTP request. Server should send another HTTP request to turn off lasers
+                this.sendIOStats();
             }
         });
     }
