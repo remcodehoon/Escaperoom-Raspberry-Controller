@@ -32,9 +32,10 @@ public class GpioService {
     private Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
     // Rode knop
-    private final GpioPinDigitalInput button = gpio.provisionDigitalInputPin(
-            RaspiPin.GPIO_13, PinPullResistance.PULL_DOWN
-    );
+    private final GpioPinDigitalInput button = gpio.provisionDigitalInputPin(RaspiPin.GPIO_13);
+//    private final GpioPinDigitalInput button = gpio.provisionDigitalInputPin(
+//            RaspiPin.GPIO_13, PinPullResistance.PULL_DOWN
+//    );
     private final GpioPinDigitalOutput buttonLED = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_12);
     private Date lastPress = Date.from(Instant.now());
 
@@ -62,9 +63,10 @@ public class GpioService {
     public GpioService() {
         button.addListener((GpioPinListenerDigital) event -> {
             // High is ingedrukt, Low is weer uitgedrukt
-            long diffTime = (lastPress.getTime() - Date.from(Instant.now()).getTime()) / 1000;
+            long diffTime = (Date.from(Instant.now()).getTime() - lastPress.getTime()) / 1000;
             if (event.getState().isHigh() && diffTime > 5) {
                 this.sendIOStats();
+                this.lastPress = Date.from(Instant.now());
             }
         });
 
