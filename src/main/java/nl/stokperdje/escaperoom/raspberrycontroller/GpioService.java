@@ -18,8 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 
-import java.util.Date;
-import java.util.Timer;
+import java.util.*;
 
 @Service
 public class GpioService {
@@ -70,11 +69,18 @@ public class GpioService {
             }
         });
 
-        schakelKastje.addListener((GpioPinListenerDigital) event -> {
-            if (event.getState().isHigh()) {
-                this.sendIOStats();
-            }
-        });
+        List<GpioPinDigital> pins = Arrays.asList(
+                lock3V, lock12V,
+                schakelKastje,
+                buttonLED,
+                lasers,
+                hoofdverlichting,
+                rookToggle, rookStroom,
+                sensor1, sensor2
+        );
+        pins.forEach(pin -> pin.addListener((GpioPinListenerDigital) event -> {
+            this.sendIOStats();
+        }));
     }
 
     /**
